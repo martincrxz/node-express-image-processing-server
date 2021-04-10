@@ -36,9 +36,9 @@ router.post('/upload', upload.single('photo'), async function(request, response)
     }
 
     try {
-        await imageProcessor(request.file.filename)
-    } catch(error) {
-
+        await imageProcessor(request.file.filename);
+    } catch (error) {
+    
     }
 
     return response.status(201).json({success: true});

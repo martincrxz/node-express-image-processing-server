@@ -1,8 +1,8 @@
 const path = require('path')
 const { Worker, isMainThread } = require('worker_threads')
 
-const resizeWorkerPath = path.resolve(__dirname, 'resizeWorker.js')
-const monochromeWorkerPath = path.resolve(__dirname, 'monochromeWorker.js')
+const pathToResizeWorker = path.resolve(__dirname, 'resizeWorker.js')
+const pathToMonochromeWorker = path.resolve(__dirname, 'monochromeWorker.js')
 
 function uploadPathResolver(filename) {
     return path.resolve(__dirname, '../uploads', filename)
@@ -21,20 +21,20 @@ function imageProcessor(filename) {
             reject(new Error("not on main thread"))
         } else {
             try {
-                const resizeWorker = new Worker(resizeWorkerPath, {
+                const resizeWorker = new Worker(pathToResizeWorker, {
                     workerData: {source: sourcePath, destination: resizeDestination}
                 })
 
-                const monochromeWorker = new Worker(monochromeWorkerPath, {
+                const monochromeWorker = new Worker(pathToMonochromeWorker, {
                     workerData: {source: sourcePath, destination: monochromeDestination}
                 })
 
-                resizeWorker.on('message', function(message) {
-                    resizeWorkerFinished = true
+                resizeWorker.on('message', (message) => {
+                    resizeWorkerFinished = true;
                     if (monochromeWorkerFinished) {
-                        resolve('resizeWorker finished processing')
+                      resolve('resizeWorker finished processing');
                     }
-                })
+                  });
 
                 resizeWorker.on('error', function(error) {
                     reject(new Error(error.message))
@@ -42,16 +42,16 @@ function imageProcessor(filename) {
 
                 resizeWorker.on('exit', function(code) {
                     if (code !== 0) {
-                        reject(new Error('exited with status code ' + code))
+                        reject(new Error('Exited with status code ' + code))
                     }
                 })
 
-                monochromeWorker.on('message', function(message) {
-                    monochromeWorkerFinished = true
+                monochromeWorker.on('message', (message) => {
+                    monochromeWorkerFinished = true;
                     if (resizeWorkerFinished) {
-                        resolve('monochromeWorker finished processing')
+                      resolve('monochromeWorker finished processing');
                     }
-                })
+                  });
 
                 monochromeWorker.on('error', function(error) {
                     reject(new Error(error.message))
@@ -59,7 +59,7 @@ function imageProcessor(filename) {
 
                 monochromeWorker.on('exit', function(code) {
                     if (code !== 0) {
-                        reject(new Error('exited with status code ' + code))
+                        reject(new Error('Exited with status code ' + code))
                     }
                 })
             } catch (error) {
